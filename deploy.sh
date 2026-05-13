@@ -22,12 +22,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-log "✅ Code updated"
+log "✅ Code updated (commit: $(git rev-parse --short HEAD))"
 
 # Обновляем зависимости если есть venv
 if [ -d "$BOT_DIR/venv" ]; then
     source $BOT_DIR/venv/bin/activate
     pip install -r $BOT_DIR/requirements.txt 2>/dev/null
+    log "📦 Dependencies updated"
 fi
 
 # Перезапускаем бота
@@ -39,6 +40,7 @@ if systemctl is-active --quiet reelynx-discord-bot; then
     log "✅ Bot restarted successfully"
 else
     log "❌ Bot failed to start"
+    sudo journalctl -u reelynx-discord-bot -n 10 --no-pager >> $LOG_FILE
     exit 1
 fi
 
