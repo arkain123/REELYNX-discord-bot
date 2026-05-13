@@ -14,8 +14,12 @@ log "🚀 Deploy started: $BRANCH/$COMMIT"
 cd $BOT_DIR || exit 1
 
 # Pull изменения
-git fetch origin
-git reset --hard origin/$BRANCH
+log "Current commit: $(git rev-parse HEAD)"
+git fetch origin --prune
+LATEST_COMMIT=$(git rev-parse origin/$BRANCH)
+log "Latest remote commit: $LATEST_COMMIT"
+git reset --hard $LATEST_COMMIT
+log "New commit: $(git rev-parse HEAD)"
 
 if [ $? -ne 0 ]; then
     log "❌ Git pull failed"
