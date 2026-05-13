@@ -6,6 +6,7 @@ from modules.handlers.command_handler import CommandHandler
 from modules.handlers.inline_handler import InlineCommandHandler
 from modules.loaders.command_loader import CommandLoader
 from modules.loaders.inline_loader import InlineCommandLoader
+from modules.services.private_voice_manager import PrivateVoiceManager
 
 load_dotenv()
 
@@ -21,6 +22,7 @@ class Core(discord.Client):
         self.tree = discord.app_commands.CommandTree(self)
         self.command_handler = None
         self.inline_handler = None
+        self.private_voice_manager = PrivateVoiceManager()
         self._initialize()
 
     def _initialize(self):
@@ -54,6 +56,11 @@ class Core(discord.Client):
 
         if self.command_handler:
             await self.command_handler.handle(message)
+
+    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState,
+                                    after: discord.VoiceState):
+        """Обработка изменений голосового состояния — делегируем менеджеру приватных каналов"""
+        await self.private_voice_manager.handle_voice_state(member, before, after)
 
     def run(self, **kwargs):
         """Запуск бота"""
