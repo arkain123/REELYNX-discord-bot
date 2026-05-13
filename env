@@ -1,0 +1,13 @@
+# ПЕРЕИМЕНОВАТЬ ДАННЫЙ ФАЙЛ В .env
+
+# Discord bot токен
+TOKEN=TOKEN_HERE
+
+# Префикс команд. По умолчанию = !
+PREFIX=!
+
+# Уровень логирования ошибок. Доступные варианты: DEBUG, INFO, NOTICE, WARNING, ERROR, CRITICAL
+LOG_LEVEL=INFO
+
+# Путь к логу
+LOG_FILE=/path/to/file
