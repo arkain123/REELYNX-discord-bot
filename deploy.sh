@@ -31,11 +31,11 @@ if [ -d "$BOT_DIR/venv" ]; then
 fi
 
 # Перезапускаем бота
-sudo systemctl restart discord-bot
+sudo systemctl restart reelynx-discord-bot
 
 sleep 2
 
-if systemctl is-active --quiet discord-bot; then
+if systemctl is-active --quiet reelynx-discord-bot; then
     log "✅ Bot restarted successfully"
 else
     log "❌ Bot failed to start"
