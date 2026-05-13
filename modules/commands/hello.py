@@ -17,4 +17,4 @@ class HelloCommand(BaseCommand):
 
     async def execute(self, context: Dict[str, Any]) -> None:
         message = context['message']
-        await message.channel.send(f'Привет, {message.author.name}! 👋')
+        await message.channel.send(f'Привет тест, {message.author.name}! 👋')
