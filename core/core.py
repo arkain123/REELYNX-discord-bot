@@ -1,7 +1,7 @@
 import discord
 import os
 from dotenv import load_dotenv
-from modules.handlers.exception_handler import log
+from modules.handlers.exception_handler import log, set_bot
 from modules.handlers.command_handler import CommandHandler
 from modules.handlers.inline_handler import InlineCommandHandler
 from modules.loaders.command_loader import CommandLoader
@@ -16,6 +16,7 @@ class Core(discord.Client):
         intents = discord.Intents.default()
         intents.message_content = True
         super().__init__(intents=intents, **options)
+        set_bot(self)
 
         # Инициализация компонентов
         self.prefix = os.getenv('PREFIX', '!')
