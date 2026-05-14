@@ -9,7 +9,7 @@ class PrivateVoiceManager:
     """
     Менеджер приватных голосовых каналов.
     При заходе в определённый канал создаётся личная комната для пользователя.
-    При выходе всех участников канал удаляется.
+    При выходе ПОСЛЕДНЕГО участника канал удаляется.
     """
     _instance = None
     _private_channels: Dict[int, int] = {}  # {channel_id: owner_id}
@@ -38,6 +38,7 @@ class PrivateVoiceManager:
     async def handle_voice_state(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
         guild = member.guild
 
+        # --- Случай 1: Зашёл в канал-триггер ---
         if after.channel and self.is_trigger_channel(after.channel.id):
             existing = self._get_user_private_channel(member)
             if existing:
@@ -46,17 +47,27 @@ class PrivateVoiceManager:
                 return
 
             await self._create_private_channel(member, after.channel.category, after.channel)
+            return
 
-        elif before.channel and before.channel.id in self._private_channels:
-            owner_id = self._private_channels[before.channel.id]
-            if member.id == owner_id:
+        # --- Случай 2: Вышел из канала ---
+        if before.channel:
+            # Проверяем конкретный канал, из которого вышел участник
+            if before.channel.id in self._private_channels:
                 remaining = [m for m in before.channel.members if not m.bot]
                 if not remaining:
+                    log(f"Канал {before.channel.name} опустел (вышел {member.display_name}), удаляем", "info")
                     await self._delete_private_channel(before.channel)
                 else:
-                    log(f"Владелец {member.display_name} вышел, но канал не пуст", "debug")
-            else:
-                log(f"Участник {member.display_name} вышел из чужого приватного канала", "debug")
+                    log(f"В канале {before.channel.name} осталось {len(remaining)} участников", "debug")
+
+            # Дополнительная проверка всех приватных каналов (на случай, если удаление не сработало)
+            for channel_id in list(self._private_channels.keys()):
+                channel = guild.get_channel(channel_id)
+                if channel:
+                    remaining = [m for m in channel.members if not m.bot]
+                    if not remaining:
+                        log(f"Канал {channel.name} опустел (глобальная проверка), удаляем", "info")
+                        await self._delete_private_channel(channel)
 
     async def _create_private_channel(self, member: discord.Member, category: Optional[discord.CategoryChannel], position_anchor: discord.VoiceChannel):
         guild = member.guild
